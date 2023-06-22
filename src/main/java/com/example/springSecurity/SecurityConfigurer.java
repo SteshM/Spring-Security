@@ -11,6 +11,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 @EnableWebSecurity
 @Configuration
@@ -28,10 +29,12 @@ public class SecurityConfigurer {
     public SecurityFilterChain configurer(HttpSecurity http) throws Exception{
         return http
                 .csrf((csrf)-> csrf.disable())
-                .authorizeHttpRequests((authorizeHttpRequests)->authorizeHttpRequests.requestMatchers(("/login")).permitAll())
-                .authorizeHttpRequests((authorizeHttpRequests)->authorizeHttpRequests.requestMatchers(("/Welcome")).hasAnyAuthority("admin"))
-                .authorizeHttpRequests((authorizeHttpRequests)->authorizeHttpRequests.requestMatchers(("/Welcome")).hasAnyAuthority("Student"))
-                .authorizeHttpRequests((authorizeHttpRequests)->authorizeHttpRequests.requestMatchers(("/Welcome")).hasAnyAuthority("Lecturer"))
+                .authorizeHttpRequests((authorizeHttpRequests)->authorizeHttpRequests.requestMatchers("/login", "/Welcome","/register").permitAll())
+                .authorizeHttpRequests((authorizeHttpRequests)->authorizeHttpRequests.requestMatchers(("/Admin/**")).hasAnyAuthority("admin"))
+                .authorizeHttpRequests((authorizeHttpRequests)->authorizeHttpRequests.requestMatchers(("/Student/**")).hasAnyAuthority("Student"))
+                .authorizeHttpRequests((authorizeHttpRequests)->authorizeHttpRequests.requestMatchers(("/Lecturer/**")).hasAnyAuthority("Lecturer"))
+                .addFilterBefore(new CustomAuthorizationFilter(), BasicAuthenticationFilter.class)
                 .authorizeHttpRequests((authorizeHttpRequests)->authorizeHttpRequests.anyRequest().authenticated())
+                .build();
     }
 }
